@@ -1,320 +1,528 @@
 import {
+  useEffect,
   useState,
   type ChangeEvent,
   type FormEvent,
-} from 'react';
-import { FaTrash } from 'react-icons/fa';
-
-import Tabs from '../../../components/Tabs/Tabs';
-import ConfirmDialog from '../../../components/ConfirmDialog/ConfirmDialog';
-import RichTextEditor from '../../../components/RichTextEditor/RichTextEditor';
-
-import type { Tab } from '../../../types/Tab';
-import type { Card } from '../../../types/Card';
+} from "react";
 
 import {
-  saveCard,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
+
+import {
+  Alert,
+  Badge,
+  Box,
+  Button,
+  Card as MantineCard,
+  Flex,
+  Group,
+  Paper,
+  Stack,
+  Switch,
+  Text,
+  TextInput,
+  ThemeIcon,
+  Title,
+} from "@mantine/core";
+
+import {
+  IconArrowLeft,
+  IconCheck,
+  IconInfoCircle,
+  IconX,
+} from "@tabler/icons-react";
+
+import {
+  FaTrash,
+} from "react-icons/fa";
+
+import Tabs from "../../../components/Tabs/Tabs";
+
+import RichTextEditor from "../../../components/RichTextEditor/RichTextEditor";
+
+import type { Card } from "../../../types/Card";
+
+import type { Tab } from "../../../types/Tab";
+
+import {
   deleteCard,
-} from '../../../services/cardService';
+  getCardById,
+  saveCard,
+  updateCard,
+} from "../../../services/cardService";
 
-export default function AdminPage() {
-  const [card, setCard] = useState<Card>({
-    titulo: '',
-    descricao: '',
-    icone: '',
-    slug: '',
-    content: '',
-  });
+const EMPTY_CARD: Card = {
+  title: "",
+  description: "",
+  icon: "",
+  content: "",
+  active: true,
+};
 
-  const [salvando, setSalvando] = useState(false);
-  const [mensagem, setMensagem] = useState('');
-  const [tipoMensagem, setTipoMensagem] = useState<
-    'success' | 'error'
-  >('success');
+export default function Admin() {
 
-  const [modalExcluirAberto, setModalExcluirAberto] =
+  const navigate = useNavigate();
+
+  const { id } = useParams();
+
+  const [card, setCard] =
+    useState<Card>(EMPTY_CARD);
+
+  const [saving, setSaving] =
     useState(false);
 
-  function handleChange(
-    event: ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement
-    >
+  const [message, setMessage] =
+    useState("");
+
+  const [messageType, setMessageType] =
+    useState<"success" | "error">(
+      "success"
+    );
+
+  const isNewCard = !card.id;
+
+  function showMessage(
+    type: "success" | "error",
+    text: string
   ) {
-    const { name, value } = event.target;
+
+    setMessageType(type);
+
+    setMessage(text);
+
+    setTimeout(() => {
+
+      setMessage("");
+
+    }, 2500);
+  }
+
+  useEffect(() => {
+
+    async function loadCard() {
+
+      if (!id) {
+        return;
+      }
+
+      try {
+
+        const response =
+          await getCardById(
+            Number(id)
+          );
+
+        setCard(response);
+
+      } catch (error) {
+
+        console.error(error);
+
+        showMessage(
+          "error",
+          "Erro ao carregar card."
+        );
+      }
+    }
+
+    loadCard();
+
+  }, [id]);
+
+  function updateField<
+    K extends keyof Card
+  >(
+    field: K,
+    value: Card[K]
+  ) {
 
     setCard((prev) => ({
       ...prev,
-      [name]: value,
+      [field]: value,
     }));
   }
 
-  async function handleSubmit(
-    event: FormEvent<HTMLFormElement>
+  function handleChange(
+    event: ChangeEvent<HTMLInputElement>
   ) {
-    event.preventDefault();
+
+    const { name, value } =
+      event.target;
+
+    updateField(
+      name as keyof Card,
+      value
+    );
+  }
+
+  async function handleToggleActive(
+    checked: boolean
+  ) {
 
     try {
-      setSalvando(true);
-      setMensagem('');
 
-      const isEdicao = !!card.id;
+      const updatedCard = {
+        ...card,
+        active: checked,
+      };
 
-      // Salva todos os campos, inclusive content
-      const cardSalvo = await saveCard(card);
+      setCard(updatedCard);
 
-      setCard(cardSalvo);
+      await updateCard(updatedCard);
 
-      setTipoMensagem('success');
-      setMensagem(
-        isEdicao
-          ? 'Card atualizado com sucesso!'
-          : 'Card criado com sucesso!'
+      showMessage(
+        "success",
+        checked
+          ? "Card ativado com sucesso."
+          : "Card inativado com sucesso."
       );
-    } catch (error) {
-      console.error('Erro ao salvar o card:', error);
 
-      setTipoMensagem('error');
-      setMensagem('Erro ao salvar o card.');
-    } finally {
-      setSalvando(false);
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        "error",
+        "Erro ao alterar status."
+      );
     }
   }
 
-  function handleDelete() {
-    setModalExcluirAberto(true);
+  async function handleSave(
+    event?: FormEvent
+  ) {
+
+    event?.preventDefault();
+
+    if (
+      card.title.trim() === ""
+    ) {
+
+      showMessage(
+        "error",
+        "Título obrigatório."
+      );
+
+      return;
+    }
+
+    try {
+
+      setSaving(true);
+
+      const isEdit =
+        !!card.id;
+
+      const savedCard =
+        await saveCard(card);
+
+      setCard(savedCard);
+
+      showMessage(
+        "success",
+        isEdit
+          ? "Card salvo com sucesso."
+          : "Card criado com sucesso."
+      );
+
+      if (
+        !isEdit &&
+        savedCard.id
+      ) {
+
+        navigate(
+          `/admin/card/${savedCard.id}`
+        );
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
+      showMessage(
+        "error",
+        "Erro ao salvar."
+      );
+
+    } finally {
+
+      setSaving(false);
+    }
   }
 
-  async function confirmarDelete() {
+  async function handleDelete() {
+
     if (!card.id) {
       return;
     }
 
     try {
-      setSalvando(true);
-      setMensagem('');
 
       await deleteCard(card.id);
 
-      // Limpa o formulário
-      setCard({
-        titulo: '',
-        descricao: '',
-        icone: '',
-        slug: '',
-        content: '',
-      });
+      showMessage(
+        "success",
+        "Card removido com sucesso."
+      );
 
-      setTipoMensagem('success');
-      setMensagem('Card removido com sucesso!');
+      setTimeout(() => {
+
+        navigate("/admin/cards");
+
+      }, 800);
+
     } catch (error) {
-      console.error('Erro ao remover o card:', error);
 
-      setTipoMensagem('error');
-      setMensagem('Erro ao remover o card.');
-    } finally {
-      setSalvando(false);
-      setModalExcluirAberto(false);
+      console.error(error);
+
+      showMessage(
+        "error",
+        "Erro ao remover card."
+      );
     }
   }
 
   const tabs: Tab[] = [
     {
-      id: 'card',
-      label: 'Card',
+      id: "card",
+
+      label: "Card",
+
       content: (
-        <div>
-          {/* Cabeçalho do formulário */}
-          <div className="form-header">
-            <div>
-              <h2>Cadastro de Card</h2>
-              <p>
-                Preencha as informações abaixo para criar
-                ou editar um card.
-              </p>
-            </div>
+        <Stack gap="lg">
 
-            <div className="form-toolbar">
-              {/* Exibe apenas após o primeiro salvamento */}
-              {card.id && (
-                <>
-                  <label className="status-switch">
-                    <input
-                      type="checkbox"
-                      checked={true}
-                      readOnly
-                    />
-                    <span className="status-slider"></span>
-                    <span className="status-text">
-                      Ativo
-                    </span>
-                  </label>
+          <TextInput
+            label="Título"
+            name="title"
+            value={card.title}
+            onChange={handleChange}
+            placeholder="Digite o título"
+            radius="lg"
+          />
 
-                  <button
-                    type="button"
-                    className="delete-button"
-                    onClick={handleDelete}
-                    disabled={salvando}
-                  >
-                    <FaTrash />
-                    <span>Remover</span>
-                  </button>
-                </>
-              )}
+          <TextInput
+            label="Descrição"
+            name="description"
+            value={card.description}
+            onChange={handleChange}
+            placeholder="Digite a descrição"
+            radius="lg"
+          />
 
-              <button
-                type="button"
-                className="save-button"
-                onClick={() =>
-                  document
-                    .getElementById('card-form')
-                    ?.requestSubmit()
-                }
-                disabled={salvando}
-              >
-                {salvando
-                  ? 'Salvando...'
-                  : 'Salvar'}
-              </button>
-            </div>
-          </div>
+          <TextInput
+            label="Ícone"
+            name="icon"
+            value={card.icon}
+            onChange={handleChange}
+            placeholder="Ex.: FaUser"
+            radius="lg"
+          />
 
-          {/* Mensagens */}
-          {mensagem && (
-            <div
-              className={`form-message ${
-                tipoMensagem === 'error'
-                  ? 'form-message-error'
-                  : 'form-message-success'
-              }`}
-            >
-              {mensagem}
-            </div>
-          )}
-
-          {/* Formulário principal */}
-          <form
-            id="card-form"
-            className="card-form"
-            onSubmit={handleSubmit}
-          >
-            <div>
-              <label htmlFor="titulo">
-                Título
-              </label>
-              <input
-                type="text"
-                id="titulo"
-                name="titulo"
-                value={card.titulo}
-                onChange={handleChange}
-                placeholder="Digite o título do card"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="descricao">
-                Descrição
-              </label>
-              <textarea
-                id="descricao"
-                name="descricao"
-                rows={4}
-                value={card.descricao}
-                onChange={handleChange}
-                placeholder="Digite a descrição do card"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="icone">
-                Ícone
-              </label>
-              <input
-                type="text"
-                id="icone"
-                name="icone"
-                value={card.icone}
-                onChange={handleChange}
-                placeholder="Ex.: FaUsers"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="slug">
-                Slug
-              </label>
-              <input
-                type="text"
-                id="slug"
-                name="slug"
-                value={card.slug}
-                onChange={handleChange}
-                placeholder="exemplo-do-card"
-              />
-            </div>
-          </form>
-        </div>
+        </Stack>
       ),
     },
 
     {
-      id: 'midias',
-      label: 'Mídias',
+      id: "midias",
+
+      label: "Mídias",
+
       content: (
-        <div>
-          <h2>Mídias</h2>
-
-          <p>
-            Aqui você poderá criar o conteúdo completo
-            do card com texto, imagens, vídeos, embeds
-            de YouTube e Vimeo, links, tabelas,
-            callouts e colagem de imagens com Ctrl + V.
-          </p>
-
-          <div style={{ marginTop: '24px' }}>
-            <RichTextEditor
-              value={card.content || ''}
-              onChange={(html) =>
-                setCard((prev) => ({
-                  ...prev,
-                  content: html,
-                }))
-              }
-            />
-          </div>
-        </div>
+        <RichTextEditor
+          value={
+            card.content || ""
+          }
+          onChange={(value) =>
+            updateField(
+              "content",
+              value
+            )
+          }
+        />
       ),
     },
 
     {
-      id: 'configuracoes',
-      label: 'Configurações',
+      id: "configuracoes",
+
+      label: "Configurações",
+
       content: (
-        <div>
-          <h2>Configurações</h2>
-          <p>
-            Defina opções adicionais do card, como
-            status, visibilidade e publicação.
-          </p>
-        </div>
+        <Text c="dimmed">
+          Configurações futuras do card.
+        </Text>
       ),
     },
   ];
 
   return (
-    <>
-      <Tabs tabs={tabs} />
+    <Box p="lg">
 
-      <ConfirmDialog
-        open={modalExcluirAberto}
-        title="Remover Card"
-        message="Deseja realmente remover este card?"
-        onConfirm={confirmarDelete}
-        onCancel={() =>
-          setModalExcluirAberto(false)
-        }
-        loading={salvando}
-      />
-    </>
+      <Paper
+        p="xl"
+        radius="24px"
+        mb="xl"
+        style={{
+          background:
+            "linear-gradient(180deg, #111827 0%, #0f172a 100%)",
+
+          border:
+            "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+
+        <Flex
+          justify="space-between"
+          align="center"
+        >
+
+          <Group>
+
+            <ThemeIcon
+              size={56}
+              radius="xl"
+              variant="gradient"
+              gradient={{
+                from: "violet",
+                to: "blue",
+              }}
+            >
+              <IconInfoCircle size={28} />
+            </ThemeIcon>
+
+            <div>
+
+              <Title
+                order={2}
+                c="white"
+              >
+                {isNewCard
+                  ? "Novo Card"
+                  : "Editar Card"}
+              </Title>
+
+              <Text c="dimmed">
+                Gerencie os dados do card.
+              </Text>
+
+            </div>
+
+          </Group>
+
+          <Group>
+
+            <Button
+              variant="light"
+              color="gray"
+              radius="xl"
+              leftSection={
+                <IconArrowLeft size={18} />
+              }
+              onClick={() =>
+                navigate("/admin/cards")
+              }
+            >
+              Voltar
+            </Button>
+
+            <Badge
+              color={
+                card.active
+                  ? "green"
+                  : "red"
+              }
+              radius="xl"
+              size="lg"
+            >
+              {card.active
+                ? "ATIVO"
+                : "INATIVO"}
+            </Badge>
+
+            <Switch
+              checked={
+                card.active ?? false
+              }
+              onChange={(event) =>
+                handleToggleActive(
+                  event.currentTarget.checked
+                )
+              }
+              size="lg"
+              color="violet"
+            />
+
+            <Button
+              color="red"
+              radius="xl"
+              leftSection={
+                <FaTrash />
+              }
+              onClick={handleDelete}
+            >
+              Remover
+            </Button>
+
+            <Button
+              radius="xl"
+              variant="gradient"
+              gradient={{
+                from: "violet",
+                to: "blue",
+              }}
+              loading={saving}
+              onClick={handleSave}
+            >
+              Salvar
+            </Button>
+
+          </Group>
+
+        </Flex>
+
+      </Paper>
+
+      {message && (
+
+        <Alert
+          mb="lg"
+          radius="xl"
+          color={
+            messageType ===
+            "success"
+              ? "green"
+              : "red"
+          }
+          icon={
+            messageType ===
+            "success"
+              ? <IconCheck />
+              : <IconX />
+          }
+        >
+          {message}
+        </Alert>
+
+      )}
+
+      <MantineCard
+        radius="24px"
+        p="xl"
+        style={{
+          background:
+            "linear-gradient(180deg, #111827 0%, #0f172a 100%)",
+
+          border:
+            "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+
+        <Tabs tabs={tabs} />
+
+      </MantineCard>
+
+    </Box>
   );
 }

@@ -19,22 +19,30 @@ public class Card {
     @Column(nullable = false)
     private String icon;
 
-    @Column(nullable = false, unique = true)
-    private String slug;
-
     @Column(columnDefinition = "TEXT")
     private String content;
+
+    @Column(nullable = false)
+    private Boolean active = true;
 
     public Card() {
     }
 
-    public Card(Long id, String title, String description, String icon, String slug, String content) {
+    public Card(
+            Long id,
+            String title,
+            String description,
+            String icon,
+            String content,
+            Boolean active
+    ) {
+
         this.id = id;
         this.title = title;
         this.description = description;
         this.icon = icon;
-        this.slug = slug;
         this.content = content;
+        this.active = active;
     }
 
     public Long getId() {
@@ -69,13 +77,6 @@ public class Card {
         this.icon = icon;
     }
 
-    public String getSlug() {
-        return slug;
-    }
-
-    public void setSlug(String slug) {
-        this.slug = slug;
-    }
 
     public String getContent() {
         return content;
@@ -83,5 +84,13 @@ public class Card {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 }

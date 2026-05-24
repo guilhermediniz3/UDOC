@@ -8,19 +8,20 @@ public class CardDTO {
     private String title;
     private String description;
     private String icon;
-    private String slug;
     private String content;
+    private Boolean active;
 
     public CardDTO() {
     }
 
     public CardDTO(Card card) {
+
         this.id = card.getId();
         this.title = card.getTitle();
         this.description = card.getDescription();
         this.icon = card.getIcon();
-        this.slug = card.getSlug();
         this.content = card.getContent();
+        this.active = card.getActive();
     }
 
     public Long getId() {
@@ -55,13 +56,6 @@ public class CardDTO {
         this.icon = icon;
     }
 
-    public String getSlug() {
-        return slug;
-    }
-
-    public void setSlug(String slug) {
-        this.slug = slug;
-    }
 
     public String getContent() {
         return content;
@@ -69,5 +63,13 @@ public class CardDTO {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 }
