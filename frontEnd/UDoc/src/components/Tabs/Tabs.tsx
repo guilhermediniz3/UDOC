@@ -1,6 +1,11 @@
-import { Tabs as MantineTabs } from "@mantine/core";
+import {
+  Tabs as MantineTabs,
 
-import type { Tab } from "../../types/Tab";
+  useMantineColorScheme,
+} from "@mantine/core";
+
+import type { Tab }
+from "../../types/Tab";
 
 interface TabsProps {
   tabs: Tab[];
@@ -9,9 +14,21 @@ interface TabsProps {
 export default function Tabs({
   tabs,
 }: TabsProps) {
+
+  const {
+    colorScheme,
+  } =
+    useMantineColorScheme();
+
+  const dark =
+    colorScheme ===
+    "dark";
+
   return (
     <MantineTabs
-      defaultValue={tabs[0]?.id}
+      defaultValue={
+        tabs[0]?.id
+      }
       variant="outline"
       radius="lg"
       keepMounted={false}
@@ -21,36 +38,66 @@ export default function Tabs({
         },
 
         list: {
+
+          display: "flex",
+
+          flexWrap: "wrap",
+
+          alignItems:
+            "center",
+
           background:
-            "linear-gradient(180deg, #111827 0%, #0f172a 100%)",
+            dark
+              ? "linear-gradient(180deg, #111827 0%, #0f172a 100%)"
+              : "#ffffff",
 
           border:
-            "1px solid rgba(255,255,255,0.08)",
+            dark
+              ? "1px solid rgba(255,255,255,0.08)"
+              : "1px solid #d1d5db",
 
-          borderRadius: "18px",
+          borderRadius:
+            "18px",
 
           padding: "8px",
 
           gap: "8px",
 
-          marginBottom: "20px",
+          marginBottom:
+            "20px",
 
           boxShadow:
-            "0 10px 40px rgba(0,0,0,0.25)",
+            dark
+              ? "0 10px 40px rgba(0,0,0,0.25)"
+              : "0 10px 30px rgba(0,0,0,0.08)",
         },
 
         tab: {
-          color: "#94a3b8",
+
+          flex: "0 0 auto",
+
+          color: dark
+            ? "#94a3b8"
+            : "#374151",
 
           fontWeight: 600,
 
-          borderRadius: "12px",
+          borderRadius:
+            "12px",
 
-          transition: "all 0.2s ease",
+          transition:
+            "all 0.2s ease",
 
-          paddingInline: "18px",
+          paddingInline:
+            "18px",
 
           height: "42px",
+
+          whiteSpace:
+            "nowrap",
+
+          background:
+            "transparent",
         },
 
         tabLabel: {
@@ -58,29 +105,41 @@ export default function Tabs({
         },
 
         panel: {
-          paddingTop: "12px",
+          paddingTop:
+            "12px",
+
+          width: "100%",
         },
       }}
     >
       <MantineTabs.List>
-        {tabs.map((tab) => (
-          <MantineTabs.Tab
+
+        {tabs.map(
+          (tab) => (
+
+            <MantineTabs.Tab
+              key={tab.id}
+              value={tab.id}
+            >
+              {tab.label}
+            </MantineTabs.Tab>
+          )
+        )}
+
+      </MantineTabs.List>
+
+      {tabs.map(
+        (tab) => (
+
+          <MantineTabs.Panel
             key={tab.id}
             value={tab.id}
           >
-            {tab.label}
-          </MantineTabs.Tab>
-        ))}
-      </MantineTabs.List>
+            {tab.content}
+          </MantineTabs.Panel>
+        )
+      )}
 
-      {tabs.map((tab) => (
-        <MantineTabs.Panel
-          key={tab.id}
-          value={tab.id}
-        >
-          {tab.content}
-        </MantineTabs.Panel>
-      ))}
     </MantineTabs>
   );
 }

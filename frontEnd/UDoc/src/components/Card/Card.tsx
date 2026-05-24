@@ -5,6 +5,7 @@ import {
   Text,
   ThemeIcon,
   Box,
+  useMantineColorScheme,
 } from "@mantine/core";
 
 import * as FaIcons from "react-icons/fa";
@@ -42,6 +43,13 @@ export default function Card({
   description,
   icon,
 }: CardProps) {
+
+  const { colorScheme } =
+    useMantineColorScheme();
+
+  const isDark =
+    colorScheme === "dark";
+
   const iconName =
     icon?.trim() || "";
 
@@ -58,6 +66,7 @@ export default function Card({
   function handleMouseMove(
     e: React.MouseEvent<HTMLDivElement>
   ) {
+
     const card =
       e.currentTarget;
 
@@ -94,6 +103,7 @@ export default function Card({
   function handleMouseLeave(
     e: React.MouseEvent<HTMLDivElement>
   ) {
+
     e.currentTarget.style.transform = `
       perspective(1200px)
       rotateX(0deg)
@@ -104,6 +114,7 @@ export default function Card({
   }
 
   return (
+
     <MantineCard
       radius={24}
       padding="md"
@@ -115,6 +126,7 @@ export default function Card({
         handleMouseLeave
       }
       style={{
+
         position: "relative",
 
         overflow: "hidden",
@@ -128,8 +140,9 @@ export default function Card({
         justifyContent:
           "space-between",
 
-        background:
-          "rgba(255,255,255,0.018)",
+        background: isDark
+          ? "rgba(255,255,255,0.018)"
+          : "rgba(255,255,255,0.92)",
 
         backdropFilter:
           "blur(18px)",
@@ -137,8 +150,9 @@ export default function Card({
         WebkitBackdropFilter:
           "blur(18px)",
 
-        border:
-          "1px solid rgba(255,255,255,0.04)",
+        border: isDark
+          ? "1px solid rgba(255,255,255,0.04)"
+          : "1px solid rgba(0,0,0,0.06)",
 
         transition:
           "all 0.28s cubic-bezier(0.22, 1, 0.36, 1)",
@@ -151,34 +165,43 @@ export default function Card({
         willChange:
           "transform",
 
-        boxShadow:
+        boxShadow: isDark
+
+          ? `
+            0 10px 25px rgba(0,0,0,0.18),
+            inset 0 1px 0 rgba(255,255,255,0.03)
           `
-          0 10px 25px rgba(0,0,0,0.18),
-          inset 0 1px 0 rgba(255,255,255,0.03)
-        `,
+
+          : `
+            0 10px 25px rgba(0,0,0,0.08),
+            inset 0 1px 0 rgba(255,255,255,0.7)
+          `,
       }}
+
       styles={{
         root: {
           ":hover": {
-            background:
-              "rgba(255,255,255,0.03)",
+
+            background: isDark
+              ? "rgba(255,255,255,0.03)"
+              : "rgba(255,255,255,1)",
 
             border:
               "1px solid rgba(139,92,246,0.18)",
 
             boxShadow:
               `
-              0 18px 45px rgba(0,0,0,0.30),
-              0 0 30px rgba(139,92,246,0.10),
-              inset 0 1px 0 rgba(255,255,255,0.06)
+              0 18px 45px rgba(0,0,0,0.16),
+              0 0 30px rgba(139,92,246,0.10)
             `,
           },
         },
       }}
     >
-      {/* Glow */}
+
       <div
         style={{
+
           position: "absolute",
 
           top: -120,
@@ -200,9 +223,9 @@ export default function Card({
         }}
       />
 
-      {/* Shine */}
       <div
         style={{
+
           position: "absolute",
 
           inset: 0,
@@ -217,95 +240,59 @@ export default function Card({
         }}
       />
 
-      {/* TOP */}
-      <Group justify="space-between">
-        <ThemeIcon
-          size={52}
-          radius={18}
-          variant="gradient"
-          gradient={{
-            from: "#8b5cf6",
-            to: "#6366f1",
-            deg: 135,
-          }}
-          style={{
-            boxShadow:
-              `
-              0 8px 22px rgba(124,58,237,0.22),
-              inset 0 1px 0 rgba(255,255,255,0.12)
-            `,
-
-            flexShrink: 0,
-          }}
-        >
-          <IconComponent size={24} />
-        </ThemeIcon>
-      </Group>
-
-      {/* CONTENT */}
-      <Box
-        style={{
-          marginTop: "auto",
-        }}
+      <Stack
+        justify="space-between"
+        h="100%"
       >
-        <Stack gap={6}>
-          {/* TITLE */}
+
+        <Group justify="space-between">
+
+          <ThemeIcon
+            size={54}
+            radius={18}
+            variant="gradient"
+            gradient={{
+              from: "violet",
+              to: "blue",
+              deg: 135,
+            }}
+          >
+
+            <IconComponent size={24} />
+
+          </ThemeIcon>
+
+        </Group>
+
+        <Box>
+
           <Text
-            size="md"
             fw={700}
-            c="rgba(255,255,255,0.94)"
-            lineClamp={2}
+            size="lg"
+            mb={6}
             style={{
-              minHeight: 48,
-
-              lineHeight: 1.35,
-
-              letterSpacing:
-                "-0.02em",
-
-              display: "-webkit-box",
-
-              WebkitLineClamp: 2,
-
-              WebkitBoxOrient:
-                "vertical",
-
-              overflow: "hidden",
-
-              textOverflow:
-                "ellipsis",
+              color:
+                "var(--mantine-color-text)",
             }}
           >
             {title}
           </Text>
 
-          {/* DESCRIPTION */}
           <Text
             size="sm"
-            c="rgba(255,255,255,0.52)"
-            lineClamp={2}
+            lineClamp={3}
             style={{
-              minHeight: 42,
-
-              lineHeight: 1.6,
-
-              display: "-webkit-box",
-
-              WebkitLineClamp: 2,
-
-              WebkitBoxOrient:
-                "vertical",
-
-              overflow: "hidden",
-
-              textOverflow:
-                "ellipsis",
+              color:
+                "var(--mantine-color-dimmed)",
             }}
           >
             {description}
           </Text>
-        </Stack>
-      </Box>
+
+        </Box>
+
+      </Stack>
+
     </MantineCard>
   );
 }

@@ -18,8 +18,9 @@ import {
   Paper,
   ScrollArea,
   Stack,
-  Text,
+ Text,
   Tooltip,
+  useMantineColorScheme,
 } from "@mantine/core";
 
 import Callout from "./extensions/Callout";
@@ -65,6 +66,13 @@ export default function RichTextEditor({
   value,
   onChange,
 }: RichTextEditorProps) {
+
+  const { colorScheme } =
+    useMantineColorScheme();
+
+  const dark =
+    colorScheme === "dark";
+
   const [zoom, setZoom] =
     useState(100);
 
@@ -348,6 +356,11 @@ export default function RichTextEditor({
         radius="md"
         size="lg"
         onClick={onClick}
+        style={{
+          flexShrink: 0,
+          minWidth: 38,
+          minHeight: 38,
+        }}
       >
         {children}
       </ActionIcon>
@@ -365,18 +378,19 @@ export default function RichTextEditor({
         height: "100%",
       }}
     >
-      {/* TOOLBAR */}
       <Paper
         className="editor-toolbar"
         p="sm"
         radius="xl"
         shadow="lg"
         style={{
-          background:
-            "linear-gradient(180deg, #111827 0%, #0f172a 100%)",
+          background: dark
+            ? "linear-gradient(180deg, #111827 0%, #0f172a 100%)"
+            : "#ffffff",
 
-          border:
-            "1px solid rgba(255,255,255,0.08)",
+          border: dark
+            ? "1px solid rgba(255,255,255,0.08)"
+            : "1px solid #d1d5db",
 
           position: "sticky",
 
@@ -386,14 +400,22 @@ export default function RichTextEditor({
 
           backdropFilter:
             "blur(12px)",
+
+          overflow: "hidden",
         }}
       >
         <ScrollArea>
           <Group
-            gap="xs"
+            gap="sm"
             wrap="nowrap"
+            style={{
+              minWidth:
+                "max-content",
+
+              paddingInline:
+                "10px",
+            }}
           >
-            {/* TEXTO */}
             <ToolbarButton
               title="Negrito"
               onClick={() =>
@@ -444,55 +466,6 @@ export default function RichTextEditor({
 
             <Divider orientation="vertical" />
 
-            {/* ALINHAMENTO */}
-            <ToolbarButton
-              title="Esquerda"
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .setTextAlign(
-                    "left"
-                  )
-                  .run()
-              }
-            >
-              <FaAlignLeft />
-            </ToolbarButton>
-
-            <ToolbarButton
-              title="Centro"
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .setTextAlign(
-                    "center"
-                  )
-                  .run()
-              }
-            >
-              <FaAlignCenter />
-            </ToolbarButton>
-
-            <ToolbarButton
-              title="Direita"
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .setTextAlign(
-                    "right"
-                  )
-                  .run()
-              }
-            >
-              <FaAlignRight />
-            </ToolbarButton>
-
-            <Divider orientation="vertical" />
-
-            {/* LISTAS */}
             <ToolbarButton
               title="Lista"
               onClick={() =>
@@ -507,7 +480,7 @@ export default function RichTextEditor({
             </ToolbarButton>
 
             <ToolbarButton
-              title="Lista Numerada"
+              title="Lista Ordenada"
               onClick={() =>
                 editor
                   .chain()
@@ -538,12 +511,17 @@ export default function RichTextEditor({
                 editor
                   .chain()
                   .focus()
-                  .toggleCode()
+                  .toggleCodeBlock()
                   .run()
               }
+              active={editor.isActive(
+                "codeBlock"
+              )}
             >
               <FaCode />
             </ToolbarButton>
+
+            <Divider orientation="vertical" />
 
             <ToolbarButton
               title="Badge"
@@ -552,9 +530,6 @@ export default function RichTextEditor({
               <FaCircle />
             </ToolbarButton>
 
-            <Divider orientation="vertical" />
-
-            {/* MÍDIAS */}
             <ToolbarButton
               title="Link"
               onClick={() =>
@@ -584,13 +559,10 @@ export default function RichTextEditor({
 
             <Divider orientation="vertical" />
 
-            {/* CALLOUT */}
             <ToolbarButton
               title="Info"
               onClick={() =>
-                insertCallout(
-                  "info"
-                )
+                insertCallout("info")
               }
             >
               <FaInfoCircle />
@@ -631,7 +603,53 @@ export default function RichTextEditor({
 
             <Divider orientation="vertical" />
 
-            {/* HISTÓRICO */}
+            <ToolbarButton
+              title="Alinhar Esquerda"
+              onClick={() =>
+                editor
+                  .chain()
+                  .focus()
+                  .setTextAlign(
+                    "left"
+                  )
+                  .run()
+              }
+            >
+              <FaAlignLeft />
+            </ToolbarButton>
+
+            <ToolbarButton
+              title="Centralizar"
+              onClick={() =>
+                editor
+                  .chain()
+                  .focus()
+                  .setTextAlign(
+                    "center"
+                  )
+                  .run()
+              }
+            >
+              <FaAlignCenter />
+            </ToolbarButton>
+
+            <ToolbarButton
+              title="Alinhar Direita"
+              onClick={() =>
+                editor
+                  .chain()
+                  .focus()
+                  .setTextAlign(
+                    "right"
+                  )
+                  .run()
+              }
+            >
+              <FaAlignRight />
+            </ToolbarButton>
+
+            <Divider orientation="vertical" />
+
             <ToolbarButton
               title="Desfazer"
               onClick={() =>
@@ -660,7 +678,6 @@ export default function RichTextEditor({
 
             <Divider orientation="vertical" />
 
-            {/* ZOOM */}
             <ToolbarButton
               title="Menos Zoom"
               onClick={() =>
@@ -673,7 +690,11 @@ export default function RichTextEditor({
             <Text
               size="sm"
               fw={700}
-              c="dimmed"
+              c={
+                dark
+                  ? "gray.4"
+                  : "dark"
+              }
             >
               {zoom}%
             </Text>
@@ -690,7 +711,6 @@ export default function RichTextEditor({
         </ScrollArea>
       </Paper>
 
-      {/* EDITOR */}
       <Paper
         className="editor-wrapper"
         radius="xl"
@@ -701,11 +721,13 @@ export default function RichTextEditor({
 
           overflow: "hidden",
 
-          background:
-            "linear-gradient(180deg, #0f172a 0%, #111827 100%)",
+          background: dark
+            ? "#0f172a"
+            : "#ffffff",
 
-          border:
-            "1px solid rgba(255,255,255,0.08)",
+          border: dark
+            ? "1px solid rgba(255,255,255,0.08)"
+            : "1px solid #d1d5db",
         }}
       >
         <div className="editor-content-wrapper">
@@ -723,23 +745,34 @@ export default function RichTextEditor({
         </div>
       </Paper>
 
-      {/* DIALOG */}
-      <PromptDialog
+         <PromptDialog
         open={dialogOpen}
+
         title={dialogTitle}
+
         message={dialogMessage}
+
         placeholder="Cole aqui a URL"
+
         initialValue={dialogValue}
+
         confirmText="Inserir"
+
         cancelText="Cancelar"
-        onConfirm={(
-          value: string
-        ) => {
+
+        onConfirm={(value: string) => {
+
           if (
             !editor ||
             !dialogType
           ) {
+
             setDialogOpen(false);
+
+            setDialogValue("");
+
+            setDialogType(null);
+
             return;
           }
 
@@ -747,44 +780,53 @@ export default function RichTextEditor({
             value.trim();
 
           if (!input) {
+
             setDialogOpen(false);
+
+            setDialogValue("");
+
+            setDialogType(null);
+
             return;
           }
 
           try {
+
             if (
               dialogType ===
               "image"
             ) {
+
               editor
                 .chain()
                 .focus()
-                .setResizableImage(
-                  {
-                    src: input,
-                  }
-                )
+                .setResizableImage({
+                  src: input,
+                })
                 .run();
-            } else if (
+            }
+
+            else if (
               dialogType ===
               "video"
             ) {
+
               editor
                 .chain()
                 .focus()
-                .setResizableVideo(
-                  {
-                    src: input,
-                    width: 560,
-                    align:
-                      "center",
-                  }
-                )
+                .setResizableVideo({
+                  src: input,
+                  width: 560,
+                  align: "center",
+                })
                 .run();
-            } else if (
+            }
+
+            else if (
               dialogType ===
               "link"
             ) {
+
               editor
                 .chain()
                 .focus()
@@ -793,11 +835,10 @@ export default function RichTextEditor({
                 })
                 .run();
             }
+
           } catch (error) {
-            console.error(
-              "Erro ao inserir conteúdo:",
-              error
-            );
+
+            console.error(error);
           }
 
           setDialogOpen(false);
@@ -806,7 +847,9 @@ export default function RichTextEditor({
 
           setDialogType(null);
         }}
+
         onCancel={() => {
+
           setDialogOpen(false);
 
           setDialogValue("");
@@ -815,23 +858,29 @@ export default function RichTextEditor({
         }}
       />
 
-      {/* BADGE */}
-      <PromptBadge
-        open={badgeDialogOpen}
-        title="Inserir Badge"
-        message="Digite o texto e escolha a cor do badge."
-        placeholder="Ex.: 1"
-        initialValue={badgeText}
-        initialColor={badgeColor}
-        confirmText="Inserir"
-        cancelText="Cancelar"
-        onConfirm={
-          handleConfirmBadge
-        }
-        onCancel={() =>
-          setBadgeDialogOpen(false)
-        }
-      />
+<PromptBadge
+  open={badgeDialogOpen}
+  title="Inserir Badge"
+  message="Digite o texto do badge e escolha a cor."
+  placeholder="Ex: Novo"
+
+  initialValue={badgeText}
+
+  initialColor={badgeColor}
+
+  onConfirm={
+    handleConfirmBadge
+  }
+
+  onCancel={() => {
+
+    setBadgeDialogOpen(false);
+
+    setBadgeText("1");
+
+    setBadgeColor("#2563eb");
+  }}
+/>
     </Stack>
   );
 }

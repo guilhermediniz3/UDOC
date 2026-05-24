@@ -11,6 +11,7 @@ import {
   Table,
   Text,
   TextInput,
+  useMantineColorScheme,
 } from "@mantine/core";
 
 import {
@@ -47,6 +48,13 @@ export default function AdminListCards() {
 
   const navigate =
     useNavigate();
+
+  const {
+    colorScheme,
+  } = useMantineColorScheme();
+
+  const dark =
+    colorScheme === "dark";
 
   const [cards, setCards] =
     useState<Card[]>([]);
@@ -153,7 +161,7 @@ export default function AdminListCards() {
     <Stack
       p="30px"
       gap="20px"
-      bg="#111111"
+      bg="var(--app-bg)"
       mih="100vh"
     >
 
@@ -194,10 +202,13 @@ export default function AdminListCards() {
         radius="24px"
         style={{
           background:
-            "linear-gradient(180deg, #111827 0%, #0f172a 100%)",
+            "var(--card-bg)",
 
           border:
-            "1px solid rgba(255,255,255,0.08)",
+            "1px solid var(--border-color)",
+
+          boxShadow:
+            "0 10px 30px var(--shadow-color)",
         }}
       >
 
@@ -209,14 +220,16 @@ export default function AdminListCards() {
           <div>
 
             <Text
-              c="white"
+              c="var(--text-primary)"
               fw={700}
               fz={36}
             >
               Administração de Cards
             </Text>
 
-            <Text c="dimmed">
+            <Text
+              c="var(--text-secondary)"
+            >
               Gerencie os cards do sistema
             </Text>
 
@@ -251,10 +264,13 @@ export default function AdminListCards() {
         radius="24px"
         style={{
           background:
-            "linear-gradient(180deg, #111827 0%, #0f172a 100%)",
+            "var(--card-bg)",
 
           border:
-            "1px solid rgba(255,255,255,0.08)",
+            "1px solid var(--border-color)",
+
+          boxShadow:
+            "0 10px 30px var(--shadow-color)",
         }}
       >
 
@@ -266,78 +282,90 @@ export default function AdminListCards() {
               <IconSearch size={18} />
             }
             value={search}
-            onChange={(
-              event
-            ) => {
-
-              setPage(1);
-
+            onChange={(event) =>
               setSearch(
-                event.currentTarget
-                  .value
-              );
-            }}
+                event.currentTarget.value
+              )
+            }
             radius="xl"
             size="md"
-            w={320}
+            styles={{
+              input: {
+                background:
+                  "var(--input-bg)",
+
+                border:
+                  "1px solid var(--border-color)",
+
+                color:
+                  "var(--text-primary)",
+              },
+            }}
           />
 
           <Select
             placeholder="Status"
             radius="xl"
             size="md"
-            w={180}
-            value={
-              activeFilter
-            }
-            onChange={(
-              value
-            ) => {
-
-              setPage(1);
-
-              setActiveFilter(
-                value
-              );
-            }}
+            clearable
+            value={activeFilter}
+            onChange={setActiveFilter}
             data={[
               {
-                value: "true",
                 label: "Ativos",
+                value: "true",
               },
-
               {
-                value: "false",
                 label: "Inativos",
+                value: "false",
               },
             ]}
-            clearable
+            styles={{
+              input: {
+                background:
+                  "var(--input-bg)",
+
+                border:
+                  "1px solid var(--border-color)",
+
+                color:
+                  "var(--text-primary)",
+              },
+            }}
           />
 
         </Group>
 
         <Table
+          verticalSpacing="lg"
           highlightOnHover
-          verticalSpacing="md"
         >
 
           <Table.Thead>
 
             <Table.Tr>
 
-              <Table.Th>
+              <Table.Th
+                c="var(--text-primary)"
+              >
                 Título
               </Table.Th>
 
-              <Table.Th>
+              <Table.Th
+                c="var(--text-primary)"
+              >
                 Descrição
               </Table.Th>
 
-              <Table.Th>
+              <Table.Th
+                c="var(--text-primary)"
+              >
                 Status
               </Table.Th>
 
-              <Table.Th>
+              <Table.Th
+                c="var(--text-primary)"
+              >
                 Ações
               </Table.Th>
 
@@ -347,113 +375,116 @@ export default function AdminListCards() {
 
           <Table.Tbody>
 
-            {cards.map(
-              (card) => (
+            {cards.map((card) => (
 
-                <Table.Tr
-                  key={card.id}
-                >
+              <Table.Tr
+                key={card.id}
+              >
 
-                  <Table.Td>
+                <Table.Td>
 
-                    <Text
-                      fw={600}
-                      c="white"
-                    >
-                      {
-                        card.title
-                      }
-                    </Text>
+                  <Text
+                    fw={700}
+                    c="var(--text-primary)"
+                  >
+                    {card.title}
+                  </Text>
 
-                  </Table.Td>
+                </Table.Td>
 
-                  <Table.Td>
+                <Table.Td>
 
-                    <Text c="dimmed">
-                      {
-                        card.description
-                      }
-                    </Text>
+                  <Text
+                    c="var(--text-secondary)"
+                  >
+                    {card.description}
+                  </Text>
 
-                  </Table.Td>
+                </Table.Td>
 
-                  <Table.Td>
+                <Table.Td>
 
-                    <Badge
-                      color={
-                        card.active
-                          ? "green"
-                          : "red"
-                      }
+                  <Badge
+                    color={
+                      card.active
+                        ? "green"
+                        : "red"
+                    }
+                    radius="xl"
+                    size="lg"
+                  >
+                    {card.active
+                      ? "ATIVO"
+                      : "INATIVO"}
+                  </Badge>
+
+                </Table.Td>
+
+                <Table.Td>
+
+                  <Group gap="xs">
+
+                    <ActionIcon
                       radius="xl"
+                      size="lg"
+                      color="blue"
+                      variant={
+                        dark
+                          ? "light"
+                          : "filled"
+                      }
+                      onClick={() =>
+                        navigate(
+                          `/admin/card/${card.id}`
+                        )
+                      }
                     >
-                      {card.active
-                        ? "ATIVO"
-                        : "INATIVO"}
-                    </Badge>
+                      <IconEdit size={18} />
+                    </ActionIcon>
 
-                  </Table.Td>
+                    <ActionIcon
+                      radius="xl"
+                      size="lg"
+                      color="violet"
+                      variant={
+                        dark
+                          ? "light"
+                          : "filled"
+                      }
+                      onClick={() =>
+                        handleClone(card.id!)
+                      }
+                    >
+                      <IconCopy size={18} />
+                    </ActionIcon>
 
-                  <Table.Td>
+                    <ActionIcon
+                      radius="xl"
+                      size="lg"
+                      color="red"
+                      variant={
+                        dark
+                          ? "light"
+                          : "filled"
+                      }
+                      onClick={() => {
+                        setSelectedCardId(
+                          card.id!
+                        );
 
-                    <Group gap="xs">
+                        open();
+                      }}
+                    >
+                      <IconTrash size={18} />
+                    </ActionIcon>
 
-                      <ActionIcon
-                        variant="light"
-                        color="blue"
-                        radius="xl"
-                        onClick={() =>
-                          navigate(
-                            `/admin/card/${card.id}`
-                          )
-                        }
-                      >
+                  </Group>
 
-                        <IconEdit size={18} />
+                </Table.Td>
 
-                      </ActionIcon>
+              </Table.Tr>
 
-                      <ActionIcon
-                        variant="light"
-                        color="violet"
-                        radius="xl"
-                        onClick={() =>
-                          handleClone(
-                            card.id
-                          )
-                        }
-                      >
-
-                        <IconCopy size={18} />
-
-                      </ActionIcon>
-
-                      <ActionIcon
-                        variant="light"
-                        color="red"
-                        radius="xl"
-                        onClick={() => {
-
-                          setSelectedCardId(
-                            card.id
-                          );
-
-                          open();
-                        }}
-                      >
-
-                        <IconTrash size={18} />
-
-                      </ActionIcon>
-
-                    </Group>
-
-                  </Table.Td>
-
-                </Table.Tr>
-
-              )
-            )}
+            ))}
 
           </Table.Tbody>
 
@@ -461,7 +492,7 @@ export default function AdminListCards() {
 
         <Group
           justify="space-between"
-          mt="xl"
+          mt="30px"
         >
 
           <Pagination
@@ -469,48 +500,38 @@ export default function AdminListCards() {
             onChange={setPage}
             total={totalPages}
             radius="xl"
-            color="violet"
           />
 
           <Select
             value={size}
-            onChange={(
-              value
-            ) => {
-
-              setPage(1);
+            onChange={(value) => {
 
               setSize(
                 value || "10"
               );
+
+              setPage(1);
             }}
             data={[
-              {
-                value: "10",
-                label:
-                  "10 / página",
-              },
-
-              {
-                value: "20",
-                label:
-                  "20 / página",
-              },
-
-              {
-                value: "50",
-                label:
-                  "50 / página",
-              },
-
-              {
-                value: "100",
-                label:
-                  "100 / página",
-              },
+              "10",
+              "20",
+              "50",
+              "100",
             ]}
-            w={150}
+            w={120}
             radius="xl"
+            styles={{
+              input: {
+                background:
+                  "var(--input-bg)",
+
+                border:
+                  "1px solid var(--border-color)",
+
+                color:
+                  "var(--text-primary)",
+              },
+            }}
           />
 
         </Group>

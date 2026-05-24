@@ -7,6 +7,7 @@ import {
   Group,
   Loader,
   Center,
+  useMantineColorScheme,
 } from "@mantine/core";
 
 import { IconLayoutGrid } from "@tabler/icons-react";
@@ -24,59 +25,79 @@ import Search from "../../components/Search/Search";
 import PaginationComponent from "../../components/Pagination/Pagination";
 
 export default function Home() {
-  const [cards, setCards] = useState<CardType[]>([]);
 
-  const [loading, setLoading] = useState(false);
+  const { colorScheme } =
+    useMantineColorScheme();
 
-  const [search, setSearch] = useState("");
+  const isDark =
+    colorScheme === "dark";
 
-  const [page, setPage] = useState(1);
+  const [cards, setCards] =
+    useState<CardType[]>([]);
 
-  const [size, setSize] = useState(10);
+  const [loading, setLoading] =
+    useState(false);
+
+  const [search, setSearch] =
+    useState("");
+
+  const [page, setPage] =
+    useState(1);
+
+  const [size, setSize] =
+    useState(10);
 
   const [totalPages, setTotalPages] =
     useState(1);
 
   async function loadCards() {
+
     try {
+
       setLoading(true);
 
-      const response = await getCards({
-        page: page - 1,
-        size,
-        search,
-      });
-
-      console.log(
-        "Cards carregados:",
-        response
-      );
+      const response =
+        await getCards({
+          page: page - 1,
+          size,
+          search,
+        });
 
       setCards(response.content);
 
-      setTotalPages(response.totalPages);
+      setTotalPages(
+        response.totalPages
+      );
+
     } catch (error) {
+
       console.error(
         "Erro ao carregar cards:",
         error
       );
+
     } finally {
+
       setLoading(false);
     }
   }
 
   useEffect(() => {
+
     loadCards();
+
   }, [page, size, search]);
 
   return (
+
     <Container
       size="xl"
       py="xl"
     >
-      {/* HEADER */}
+
       <div
         style={{
+
           position: "relative",
 
           overflow: "hidden",
@@ -87,22 +108,26 @@ export default function Home() {
 
           marginBottom: 32,
 
-          background:
-            "rgba(15, 23, 42, 0.35)",
+          background: isDark
+            ? "rgba(15, 23, 42, 0.35)"
+            : "rgba(255,255,255,0.75)",
 
           backdropFilter:
             "blur(18px)",
 
-          border:
-            "1px solid rgba(255,255,255,0.04)",
+          border: isDark
+            ? "1px solid rgba(255,255,255,0.04)"
+            : "1px solid rgba(0,0,0,0.06)",
 
-          boxShadow:
-            "0 10px 30px rgba(0,0,0,0.16)",
+          boxShadow: isDark
+            ? "0 10px 30px rgba(0,0,0,0.16)"
+            : "0 10px 30px rgba(0,0,0,0.08)",
         }}
       >
-        {/* GLOW */}
+
         <div
           style={{
+
             position: "absolute",
 
             top: -120,
@@ -127,10 +152,12 @@ export default function Home() {
           align="center"
           gap="xl"
         >
-          {/* LEFT */}
+
           <Stack gap={6}>
+
             <div
               style={{
+
                 display: "flex",
 
                 alignItems: "center",
@@ -138,8 +165,10 @@ export default function Home() {
                 gap: 18,
               }}
             >
+
               <div
                 style={{
+
                   width: 58,
 
                   height: 58,
@@ -160,95 +189,110 @@ export default function Home() {
                     "0 10px 25px rgba(124,58,237,0.20)",
                 }}
               >
+
                 <IconLayoutGrid
                   size={28}
                   color="#fff"
                 />
+
               </div>
 
               <div>
+
                 <Title
                   order={1}
-                  c="white"
+                  style={{
+                    color:
+                      "var(--mantine-color-text)",
+                  }}
                 >
                   Dashboard
                 </Title>
 
-                <Text c="dimmed">
+                <Text
+                  style={{
+                    color:
+                      "var(--mantine-color-dimmed)",
+                  }}
+                >
                   Gerencie documentos,
                   conteúdos e cards do
                   sistema.
                 </Text>
+
               </div>
+
             </div>
+
           </Stack>
 
-          {/* SEARCH */}
           <div
             style={{
               width: 340,
             }}
           >
+
             <Search
               value={search}
               onChange={(value) => {
+
                 setPage(1);
 
                 setSearch(value);
               }}
             />
+
           </div>
+
         </Group>
+
       </div>
 
-      {/* LOADING */}
       {loading ? (
-        <Center py={80}>
-          <Loader
-            size="lg"
-            color="violet"
-          />
+
+        <Center py={100}>
+
+          <Loader size="lg" />
+
         </Center>
+
       ) : (
-        <>
-          {/* GRID */}
+
+        <Stack gap="xl">
+
           <SimpleGrid
             cols={{
               base: 1,
               sm: 2,
-              md: 2,
-              lg: 3,
-              xl: 4,
+              md: 3,
+              lg: 4,
             }}
-            spacing={28}
-            verticalSpacing={28}
+            spacing="xl"
           >
+
             {cards.map((card) => (
+
               <Card
                 key={card.id}
                 title={card.title}
-                description={
-                  card.description
-                }
+                description={card.description}
                 icon={card.icon}
               />
+
             ))}
+
           </SimpleGrid>
 
-          {/* PAGINATION */}
           <PaginationComponent
             page={page}
-            totalPages={totalPages}
-            size={size}
-            onPageChange={setPage}
-            onSizeChange={(value) => {
-              setPage(1);
-
-              setSize(value);
-            }}
+            total={totalPages}
+            onChange={setPage}
           />
-        </>
+
+        </Stack>
+
       )}
+
     </Container>
   );
 }

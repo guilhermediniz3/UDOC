@@ -25,6 +25,7 @@ import {
   TextInput,
   ThemeIcon,
   Title,
+  useMantineColorScheme,
 } from "@mantine/core";
 
 import {
@@ -63,12 +64,25 @@ const EMPTY_CARD: Card = {
 
 export default function Admin() {
 
-  const navigate = useNavigate();
+  const navigate =
+    useNavigate();
 
-  const { id } = useParams();
+  const { id } =
+    useParams();
+
+  const {
+    colorScheme,
+  } =
+    useMantineColorScheme();
+
+  const dark =
+    colorScheme ===
+    "dark";
 
   const [card, setCard] =
-    useState<Card>(EMPTY_CARD);
+    useState<Card>(
+      EMPTY_CARD
+    );
 
   const [saving, setSaving] =
     useState(false);
@@ -76,15 +90,20 @@ export default function Admin() {
   const [message, setMessage] =
     useState("");
 
-  const [messageType, setMessageType] =
-    useState<"success" | "error">(
-      "success"
-    );
+  const [
+    messageType,
+    setMessageType,
+  ] = useState<
+    "success" | "error"
+  >("success");
 
-  const isNewCard = !card.id;
+  const isNewCard =
+    !card.id;
 
   function showMessage(
-    type: "success" | "error",
+    type:
+      | "success"
+      | "error",
     text: string
   ) {
 
@@ -145,11 +164,14 @@ export default function Admin() {
   }
 
   function handleChange(
-    event: ChangeEvent<HTMLInputElement>
+    event:
+      ChangeEvent<HTMLInputElement>
   ) {
 
-    const { name, value } =
-      event.target;
+    const {
+      name,
+      value,
+    } = event.target;
 
     updateField(
       name as keyof Card,
@@ -170,7 +192,9 @@ export default function Admin() {
 
       setCard(updatedCard);
 
-      await updateCard(updatedCard);
+      await updateCard(
+        updatedCard
+      );
 
       showMessage(
         "success",
@@ -197,7 +221,8 @@ export default function Admin() {
     event?.preventDefault();
 
     if (
-      card.title.trim() === ""
+      card.title.trim() ===
+      ""
     ) {
 
       showMessage(
@@ -260,7 +285,9 @@ export default function Admin() {
 
     try {
 
-      await deleteCard(card.id);
+      await deleteCard(
+        card.id
+      );
 
       showMessage(
         "success",
@@ -269,7 +296,9 @@ export default function Admin() {
 
       setTimeout(() => {
 
-        navigate("/admin/cards");
+        navigate(
+          "/admin/cards"
+        );
 
       }, 800);
 
@@ -300,15 +329,67 @@ export default function Admin() {
             onChange={handleChange}
             placeholder="Digite o título"
             radius="lg"
+            styles={{
+              input: {
+                background:
+                  dark
+                    ? "#1f2937"
+                    : "#ffffff",
+
+                border:
+                  dark
+                    ? "1px solid rgba(255,255,255,0.08)"
+                    : "1px solid #d1d5db",
+
+                color:
+                  dark
+                    ? "white"
+                    : "#111827",
+              },
+
+              label: {
+                color:
+                  dark
+                    ? "white"
+                    : "#111827",
+              },
+            }}
           />
 
           <TextInput
             label="Descrição"
             name="description"
-            value={card.description}
+            value={
+              card.description
+            }
             onChange={handleChange}
             placeholder="Digite a descrição"
             radius="lg"
+            styles={{
+              input: {
+                background:
+                  dark
+                    ? "#1f2937"
+                    : "#ffffff",
+
+                border:
+                  dark
+                    ? "1px solid rgba(255,255,255,0.08)"
+                    : "1px solid #d1d5db",
+
+                color:
+                  dark
+                    ? "white"
+                    : "#111827",
+              },
+
+              label: {
+                color:
+                  dark
+                    ? "white"
+                    : "#111827",
+              },
+            }}
           />
 
           <TextInput
@@ -318,6 +399,31 @@ export default function Admin() {
             onChange={handleChange}
             placeholder="Ex.: FaUser"
             radius="lg"
+            styles={{
+              input: {
+                background:
+                  dark
+                    ? "#1f2937"
+                    : "#ffffff",
+
+                border:
+                  dark
+                    ? "1px solid rgba(255,255,255,0.08)"
+                    : "1px solid #d1d5db",
+
+                color:
+                  dark
+                    ? "white"
+                    : "#111827",
+              },
+
+              label: {
+                color:
+                  dark
+                    ? "white"
+                    : "#111827",
+              },
+            }}
           />
 
         </Stack>
@@ -334,7 +440,9 @@ export default function Admin() {
           value={
             card.content || ""
           }
-          onChange={(value) =>
+          onChange={(
+            value
+          ) =>
             updateField(
               "content",
               value
@@ -347,10 +455,17 @@ export default function Admin() {
     {
       id: "configuracoes",
 
-      label: "Configurações",
+      label:
+        "Configurações",
 
       content: (
-        <Text c="dimmed">
+        <Text
+          c={
+            dark
+              ? "dimmed"
+              : "#6b7280"
+          }
+        >
           Configurações futuras do card.
         </Text>
       ),
@@ -358,7 +473,15 @@ export default function Admin() {
   ];
 
   return (
-    <Box p="lg">
+    <Box
+      p="lg"
+      bg={
+        dark
+          ? "#111111"
+          : "#f4f4f5"
+      }
+      mih="100vh"
+    >
 
       <Paper
         p="xl"
@@ -366,10 +489,19 @@ export default function Admin() {
         mb="xl"
         style={{
           background:
-            "linear-gradient(180deg, #111827 0%, #0f172a 100%)",
+            dark
+              ? "linear-gradient(180deg, #111827 0%, #0f172a 100%)"
+              : "#ffffff",
 
           border:
-            "1px solid rgba(255,255,255,0.08)",
+            dark
+              ? "1px solid rgba(255,255,255,0.08)"
+              : "1px solid #e5e7eb",
+
+          boxShadow:
+            dark
+              ? "0 10px 30px rgba(0,0,0,0.35)"
+              : "0 10px 30px rgba(0,0,0,0.08)",
         }}
       >
 
@@ -396,14 +528,24 @@ export default function Admin() {
 
               <Title
                 order={2}
-                c="white"
+                c={
+                  dark
+                    ? "white"
+                    : "#111827"
+                }
               >
                 {isNewCard
                   ? "Novo Card"
                   : "Editar Card"}
               </Title>
 
-              <Text c="dimmed">
+              <Text
+                c={
+                  dark
+                    ? "dimmed"
+                    : "#6b7280"
+                }
+              >
                 Gerencie os dados do card.
               </Text>
 
@@ -421,7 +563,9 @@ export default function Admin() {
                 <IconArrowLeft size={18} />
               }
               onClick={() =>
-                navigate("/admin/cards")
+                navigate(
+                  "/admin/cards"
+                )
               }
             >
               Voltar
@@ -443,11 +587,16 @@ export default function Admin() {
 
             <Switch
               checked={
-                card.active ?? false
+                card.active ??
+                false
               }
-              onChange={(event) =>
+              onChange={(
+                event
+              ) =>
                 handleToggleActive(
-                  event.currentTarget.checked
+                  event
+                    .currentTarget
+                    .checked
                 )
               }
               size="lg"
@@ -460,7 +609,9 @@ export default function Admin() {
               leftSection={
                 <FaTrash />
               }
-              onClick={handleDelete}
+              onClick={
+                handleDelete
+              }
             >
               Remover
             </Button>
@@ -473,7 +624,9 @@ export default function Admin() {
                 to: "blue",
               }}
               loading={saving}
-              onClick={handleSave}
+              onClick={
+                handleSave
+              }
             >
               Salvar
             </Button>
@@ -512,10 +665,19 @@ export default function Admin() {
         p="xl"
         style={{
           background:
-            "linear-gradient(180deg, #111827 0%, #0f172a 100%)",
+            dark
+              ? "linear-gradient(180deg, #111827 0%, #0f172a 100%)"
+              : "#ffffff",
 
           border:
-            "1px solid rgba(255,255,255,0.08)",
+            dark
+              ? "1px solid rgba(255,255,255,0.08)"
+              : "1px solid #e5e7eb",
+
+          boxShadow:
+            dark
+              ? "0 10px 30px rgba(0,0,0,0.35)"
+              : "0 10px 30px rgba(0,0,0,0.08)",
         }}
       >
 
