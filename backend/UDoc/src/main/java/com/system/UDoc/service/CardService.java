@@ -1,6 +1,7 @@
 package com.system.UDoc.service;
 
 import com.system.UDoc.dto.CardDTO;
+import com.system.UDoc.dto.UserCardViewDTO;
 import com.system.UDoc.entity.Card;
 import com.system.UDoc.exception.ResourceNotFoundException;
 import com.system.UDoc.repository.CardRepository;
@@ -143,5 +144,21 @@ public class CardService {
                 cardRepository.save(clonedCard);
 
         return new CardDTO(savedCard);
+    }
+
+
+    @Transactional(readOnly = true)
+    public UserCardViewDTO findViewById(
+            Long id
+    ) {
+
+        return cardRepository
+                .findViewById(id)
+
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Card não encontrado"
+                        )
+                );
     }
 }

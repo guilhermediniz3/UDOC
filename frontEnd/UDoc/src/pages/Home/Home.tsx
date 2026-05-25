@@ -10,13 +10,26 @@ import {
   useMantineColorScheme,
 } from "@mantine/core";
 
-import { IconLayoutGrid } from "@tabler/icons-react";
+import {
+  useNavigate,
+} from "react-router-dom";
 
-import { useEffect, useState } from "react";
+import {
+  IconLayoutGrid,
+} from "@tabler/icons-react";
 
-import type { Card as CardType } from "../../types/Card";
+import {
+  useEffect,
+  useState,
+} from "react";
 
-import { getCards } from "../../services/cardService";
+import type {
+  Card as CardType,
+} from "../../types/Card";
+
+import {
+  getCards,
+} from "../../services/cardService";
 
 import Card from "../../components/Card/Card";
 
@@ -28,6 +41,9 @@ export default function Home() {
 
   const { colorScheme } =
     useMantineColorScheme();
+
+  const navigate =
+    useNavigate();
 
   const isDark =
     colorScheme === "dark";
@@ -44,7 +60,7 @@ export default function Home() {
   const [page, setPage] =
     useState(1);
 
-  const [size, setSize] =
+  const [size] =
     useState(10);
 
   const [totalPages, setTotalPages] =
@@ -216,8 +232,7 @@ export default function Home() {
                   }}
                 >
                   Gerencie documentos,
-                  conteúdos e cards do
-                  sistema.
+                  conteúdos e cards do sistema.
                 </Text>
 
               </div>
@@ -272,12 +287,27 @@ export default function Home() {
 
             {cards.map((card) => (
 
-              <Card
+              <div
                 key={card.id}
-                title={card.title}
-                description={card.description}
-                icon={card.icon}
-              />
+                onClick={() =>
+                  navigate(
+                    `/view/card/${card.id}`
+                  )
+                }
+                style={{
+                  cursor: "pointer",
+                }}
+              >
+
+                <Card
+                  title={card.title}
+                  description={
+                    card.description
+                  }
+                  icon={card.icon}
+                />
+
+              </div>
 
             ))}
 

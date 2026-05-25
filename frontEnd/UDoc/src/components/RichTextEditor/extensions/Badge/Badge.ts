@@ -25,9 +25,10 @@ const Badge = Node.create({
         tag: "span[data-badge]",
         getAttrs: (element) => {
           const el = element as HTMLElement;
-
           return {
-            text: el.getAttribute("data-text") || "1",
+            // Tenta ler data-text primeiro (formato novo).
+            // Fallback para textContent (formato antigo salvo com texto filho).
+            text: el.getAttribute("data-text") || el.textContent || "1",
             color: el.getAttribute("data-color") || "#2563eb",
           };
         },
@@ -36,6 +37,8 @@ const Badge = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
+    // Não passa texto como terceiro elemento (causava o RangeError).
+    // O texto é exibido via CSS ::before usando attr(data-text).
     return [
       "span",
       mergeAttributes(HTMLAttributes, {
@@ -45,7 +48,6 @@ const Badge = Node.create({
         class: "udoc-badge",
         style: `background-color: ${HTMLAttributes.color};`,
       }),
-      HTMLAttributes.text,
     ];
   },
 
@@ -56,10 +58,7 @@ const Badge = Node.create({
         ({ commands }) => {
           return commands.insertContent({
             type: this.name,
-            attrs: {
-              text,
-              color,
-            },
+            attrs: { text, color },
           });
         },
     };
