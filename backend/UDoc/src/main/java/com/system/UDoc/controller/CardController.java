@@ -1,6 +1,7 @@
 package com.system.UDoc.controller;
 
 import com.system.UDoc.dto.CardDTO;
+import com.system.UDoc.dto.UserCardViewDTO;
 import com.system.UDoc.service.CardService;
 
 import jakarta.validation.Valid;
@@ -108,5 +109,15 @@ public class CardController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(clonedCard);
+    }
+
+    @GetMapping("/view/{id}")
+    public ResponseEntity<UserCardViewDTO> view(
+            @PathVariable Long id
+    ) {
+
+        return ResponseEntity.ok(
+                cardService.findViewById(id)
+        );
     }
 }

@@ -14,6 +14,12 @@ interface GetCardsParams {
   active?: boolean | null;
 }
 
+interface UserCardViewResponse {
+  id: number;
+
+  content: string;
+}
+
 export async function getCards({
   page = 0,
   size = 10,
@@ -47,6 +53,18 @@ export async function getCardById(
   const response =
     await api.get<Card>(
       `/cards/${id}`
+    );
+
+  return response.data;
+}
+
+export async function getCardViewById(
+  id: number
+): Promise<UserCardViewResponse> {
+
+  const response =
+    await api.get<UserCardViewResponse>(
+      `/cards/view/${id}`
     );
 
   return response.data;

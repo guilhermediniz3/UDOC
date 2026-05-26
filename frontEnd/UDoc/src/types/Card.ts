@@ -3,7 +3,6 @@ export interface Card {
   title: string;
   description: string;
   icon: string;
-  slug: string;
   content: string;
   active: boolean;
 }

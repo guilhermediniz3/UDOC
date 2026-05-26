@@ -9,6 +9,8 @@ import Admin from "../pages/Home/Admin/Admin";
 
 import AdminListCards
   from "../pages/AdminListCards/AdminListCards";
+  import UserCardView
+from "../pages/UserCardView/UserCardView";
 
 function AppRoutes() {
 
@@ -38,6 +40,10 @@ function AppRoutes() {
         path="/admin/card/:id"
         element={<Admin />}
       />
+         <Route
+          path="/view/card/:id"
+          element={<UserCardView />}
+        />
 
     </Routes>
   );

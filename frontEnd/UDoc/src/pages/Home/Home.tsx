@@ -10,6 +10,8 @@ import {
   useMantineColorScheme,
 } from "@mantine/core";
 
+import { useNavigate } from "react-router-dom";
+
 import { IconLayoutGrid } from "@tabler/icons-react";
 
 import { useEffect, useState } from "react";
@@ -25,274 +27,162 @@ import Search from "../../components/Search/Search";
 import PaginationComponent from "../../components/Pagination/Pagination";
 
 export default function Home() {
+  const { colorScheme } = useMantineColorScheme();
+  const navigate = useNavigate();
+  const isDark = colorScheme === "dark";
 
-  const { colorScheme } =
-    useMantineColorScheme();
-
-  const isDark =
-    colorScheme === "dark";
-
-  const [cards, setCards] =
-    useState<CardType[]>([]);
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [search, setSearch] =
-    useState("");
-
-  const [page, setPage] =
-    useState(1);
-
-  const [size, setSize] =
-    useState(10);
-
-  const [totalPages, setTotalPages] =
-    useState(1);
+  const [cards, setCards] = useState<CardType[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(10); // ✅ agora tem setter
+  const [totalPages, setTotalPages] = useState(1);
 
   async function loadCards() {
-
     try {
-
       setLoading(true);
 
-      const response =
-        await getCards({
-          page: page - 1,
-          size,
-          search,
-        });
+      const response = await getCards({
+        page: page - 1,
+        size,
+        search,
+      });
 
       setCards(response.content);
-
-      setTotalPages(
-        response.totalPages
-      );
-
+      setTotalPages(response.totalPages);
     } catch (error) {
-
-      console.error(
-        "Erro ao carregar cards:",
-        error
-      );
-
+      console.error("Erro ao carregar cards:", error);
     } finally {
-
       setLoading(false);
     }
   }
 
   useEffect(() => {
-
     loadCards();
-
   }, [page, size, search]);
 
+  function handleSizeChange(newSize: number) {
+    setSize(newSize);
+    setPage(1); // volta pra página 1 ao mudar o tamanho
+  }
+
+  function handleSearchChange(value: string) {
+    setPage(1); // volta pra página 1 ao buscar
+    setSearch(value);
+  }
+
   return (
-
-    <Container
-      size="xl"
-      py="xl"
-    >
-
+    <Container size="xl" py="xl">
+      {/* Header */}
       <div
         style={{
-
           position: "relative",
-
           overflow: "hidden",
-
           borderRadius: 24,
-
           padding: 32,
-
           marginBottom: 32,
-
           background: isDark
             ? "rgba(15, 23, 42, 0.35)"
             : "rgba(255,255,255,0.75)",
-
-          backdropFilter:
-            "blur(18px)",
-
+          backdropFilter: "blur(18px)",
           border: isDark
             ? "1px solid rgba(255,255,255,0.04)"
             : "1px solid rgba(0,0,0,0.06)",
-
           boxShadow: isDark
             ? "0 10px 30px rgba(0,0,0,0.16)"
             : "0 10px 30px rgba(0,0,0,0.08)",
         }}
       >
-
+        {/* Glow decorativo */}
         <div
           style={{
-
             position: "absolute",
-
             top: -120,
-
             right: -120,
-
             width: 260,
-
             height: 260,
-
             borderRadius: "50%",
-
             background:
               "radial-gradient(circle, rgba(124,58,237,0.12) 0%, rgba(124,58,237,0) 72%)",
-
             pointerEvents: "none",
           }}
         />
 
-        <Group
-          justify="space-between"
-          align="center"
-          gap="xl"
-        >
-
+        <Group justify="space-between" align="center" gap="xl">
           <Stack gap={6}>
-
-            <div
-              style={{
-
-                display: "flex",
-
-                alignItems: "center",
-
-                gap: 18,
-              }}
-            >
-
+            <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
               <div
                 style={{
-
                   width: 58,
-
                   height: 58,
-
                   borderRadius: 18,
-
                   display: "flex",
-
                   alignItems: "center",
-
-                  justifyContent:
-                    "center",
-
+                  justifyContent: "center",
                   background:
                     "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
-
-                  boxShadow:
-                    "0 10px 25px rgba(124,58,237,0.20)",
+                  boxShadow: "0 10px 25px rgba(124,58,237,0.20)",
                 }}
               >
-
-                <IconLayoutGrid
-                  size={28}
-                  color="#fff"
-                />
-
+                <IconLayoutGrid size={28} color="#fff" />
               </div>
 
               <div>
-
                 <Title
                   order={1}
-                  style={{
-                    color:
-                      "var(--mantine-color-text)",
-                  }}
+                  style={{ color: "var(--mantine-color-text)" }}
                 >
                   Dashboard
                 </Title>
-
-                <Text
-                  style={{
-                    color:
-                      "var(--mantine-color-dimmed)",
-                  }}
-                >
-                  Gerencie documentos,
-                  conteúdos e cards do
-                  sistema.
+                <Text style={{ color: "var(--mantine-color-dimmed)" }}>
+                  Gerencie documentos, conteúdos e cards do sistema.
                 </Text>
-
               </div>
-
             </div>
-
           </Stack>
 
-          <div
-            style={{
-              width: 340,
-            }}
-          >
-
-            <Search
-              value={search}
-              onChange={(value) => {
-
-                setPage(1);
-
-                setSearch(value);
-              }}
-            />
-
+          <div style={{ width: 340 }}>
+            <Search value={search} onChange={handleSearchChange} />
           </div>
-
         </Group>
-
       </div>
 
+      {/* Conteúdo */}
       {loading ? (
-
         <Center py={100}>
-
           <Loader size="lg" />
-
         </Center>
-
       ) : (
-
         <Stack gap="xl">
-
           <SimpleGrid
-            cols={{
-              base: 1,
-              sm: 2,
-              md: 3,
-              lg: 4,
-            }}
+            cols={{ base: 1, sm: 2, md: 3, lg: 4 }}
             spacing="xl"
           >
-
             {cards.map((card) => (
-
-              <Card
+              <div
                 key={card.id}
-                title={card.title}
-                description={card.description}
-                icon={card.icon}
-              />
-
+                onClick={() => navigate(`/view/card/${card.id}`)}
+                style={{ cursor: "pointer" }}
+              >
+                <Card
+                  title={card.title}
+                  description={card.description}
+                  icon={card.icon}
+                />
+              </div>
             ))}
-
           </SimpleGrid>
 
+          {/* ✅ Pagination com size e onSizeChange conectados */}
           <PaginationComponent
             page={page}
             total={totalPages}
+            size={size}
             onChange={setPage}
+            onSizeChange={handleSizeChange}
           />
-
         </Stack>
-
       )}
-
     </Container>
   );
 }

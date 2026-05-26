@@ -1,6 +1,6 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent } from "@tiptap/react";
-import React from "react";
+
 
 const CalloutComponent = ({ node, updateAttributes }: any) => {
   const { type, textAlign } = node.attrs;
@@ -10,8 +10,8 @@ const CalloutComponent = ({ node, updateAttributes }: any) => {
   };
 
   return (
-    <NodeViewWrapper 
-      className={`udoc-callout callout-${type}`} 
+    <NodeViewWrapper
+      className={`udoc-callout callout-${type}`}
       data-text-align={textAlign}
     >
       <span className="udoc-callout-alignment-toolbar" contentEditable={false}>
@@ -75,7 +75,7 @@ const CalloutComponent = ({ node, updateAttributes }: any) => {
           </svg>
         )}
       </div>
-      
+
       <div className="udoc-callout-body">
         <NodeViewContent className="udoc-callout-content" />
       </div>
@@ -91,21 +91,38 @@ const Callout = Node.create({
 
   addAttributes() {
     return {
-      type: { default: "info" },
-      textAlign: { default: "left" },
+      type: {
+        default: "info",
+        // Lê o tipo a partir da classe CSS salva no HTML (ex: "callout-info")
+        parseHTML: (element) => {
+          const classes = element.getAttribute("class") || "";
+          const match = classes.match(/callout-(info|success|warning|error)/);
+          return match ? match[1] : "info";
+        },
+      },
+      textAlign: {
+        default: "left",
+        parseHTML: (element) =>
+          element.getAttribute("data-text-align") || "left",
+      },
     };
   },
 
   parseHTML() {
-    return [{ tag: 'div[class^="udoc-callout"]' }];
+    return [
+      {
+        // Captura qualquer div que contenha a classe "udoc-callout"
+        tag: "div.udoc-callout",
+      },
+    ];
   },
 
   renderHTML({ node }) {
     return [
       "div",
-      mergeAttributes({ 
+      mergeAttributes({
         class: `udoc-callout callout-${node.attrs.type}`,
-        "data-text-align": node.attrs.textAlign 
+        "data-text-align": node.attrs.textAlign,
       }),
       0,
     ];

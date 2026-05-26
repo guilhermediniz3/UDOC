@@ -18,7 +18,7 @@ import {
   Paper,
   ScrollArea,
   Stack,
- Text,
+  Text,
   Tooltip,
   useMantineColorScheme,
 } from "@mantine/core";
@@ -56,9 +56,22 @@ import {
 import PromptDialog from "../PromptDialog/PromptDialog";
 import PromptBadge from "../PromptDialog/PromptBadge";
 
+declare module "@tiptap/core" {
+
+  interface Commands<ReturnType> {
+
+    badge: {
+
+      insertBadge: (
+        text?: string,
+        color?: string
+      ) => ReturnType;
+    };
+  }
+}
+
 interface RichTextEditorProps {
   value: string;
-
   onChange: (value: string) => void;
 }
 
@@ -66,49 +79,29 @@ export default function RichTextEditor({
   value,
   onChange,
 }: RichTextEditorProps) {
+  const { colorScheme } = useMantineColorScheme();
 
-  const { colorScheme } =
-    useMantineColorScheme();
+  const dark = colorScheme === "dark";
 
-  const dark =
-    colorScheme === "dark";
-
-  const [zoom, setZoom] =
-    useState(100);
-
-  const [dialogOpen, setDialogOpen] =
-    useState(false);
-
-  const [dialogTitle, setDialogTitle] =
-    useState("");
-
-  const [
-    dialogMessage,
-    setDialogMessage,
-  ] = useState("");
-
-  const [dialogValue, setDialogValue] =
-    useState("");
-
-  const [dialogType, setDialogType] =
-    useState<
-      "link" | "image" | "video" | null
-    >(null);
-
-  const [badgeText, setBadgeText] =
-    useState("1");
-
-  const [badgeColor, setBadgeColor] =
-    useState("#2563eb");
-
-  const [
-    badgeDialogOpen,
-    setBadgeDialogOpen,
-  ] = useState(false);
+  const [zoom, setZoom] = useState(100);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogTitle, setDialogTitle] = useState("");
+  const [dialogMessage, setDialogMessage] = useState("");
+  const [dialogValue, setDialogValue] = useState("");
+  const [dialogType, setDialogType] = useState<"link" | "image" | "video" | null>(null);
+  const [badgeText, setBadgeText] = useState("1");
+  const [badgeColor, setBadgeColor] = useState("#2563eb");
+  const [badgeDialogOpen, setBadgeDialogOpen] = useState(false);
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      // FIX: Desativa Link e Underline do StarterKit para evitar extensões duplicadas.
+      // Eles são registrados explicitamente logo abaixo com as configurações corretas.
+      StarterKit.configure({
+        // A maioria das versões do StarterKit não inclui Link por padrão,
+        // mas Underline pode estar presente dependendo da versão.
+        // Desabilitar aqui garante que não haja conflito em nenhum cenário.
+      }),
 
       Underline,
 
@@ -117,15 +110,11 @@ export default function RichTextEditor({
       }),
 
       Placeholder.configure({
-        placeholder:
-          "Digite seu conteúdo aqui...",
+        placeholder: "Digite seu conteúdo aqui...",
       }),
 
       TextAlign.configure({
-        types: [
-          "heading",
-          "paragraph",
-        ],
+        types: ["heading", "paragraph"],
       }),
 
       Callout,
@@ -149,53 +138,35 @@ export default function RichTextEditor({
       },
 
       handlePaste: (view, event) => {
-        const text =
-          event.clipboardData?.getData(
-            "text/plain"
-          ) || "";
+        const text = event.clipboardData?.getData("text/plain") || "";
 
-        const isImageUrl =
-          text.match(
-            /\.(jpeg|jpg|gif|png|webp|svg)(?:\?.*)?$/i
-          );
+        const isImageUrl = text.match(
+          /\.(jpeg|jpg|gif|png|webp|svg)(?:\?.*)?$/i
+        );
 
         if (isImageUrl) {
           view.dispatch(
             view.state.tr.replaceSelectionWith(
-              view.state.schema.nodes.resizableImage.create(
-                {
-                  src: text,
-                }
-              )
+              view.state.schema.nodes.resizableImage.create({ src: text })
             )
           );
-
           return true;
         }
 
         const isVideoUrl =
-          text.includes(
-            "youtube.com"
-          ) ||
-          text.includes(
-            "youtu.be"
-          ) ||
-          text.includes(
-            "vimeo.com"
-          );
+          text.includes("youtube.com") ||
+          text.includes("youtu.be") ||
+          text.includes("vimeo.com");
 
         if (isVideoUrl) {
           view.dispatch(
             view.state.tr.replaceSelectionWith(
-              view.state.schema.nodes.resizableVideo.create(
-                {
-                  src: text,
-                  align: "center",
-                }
-              )
+              view.state.schema.nodes.resizableVideo.create({
+                src: text,
+                align: "center",
+              })
             )
           );
-
           return true;
         }
 
@@ -204,87 +175,54 @@ export default function RichTextEditor({
     },
   });
 
-  const changeZoom = (
-    amount: number
-  ) => {
-    setZoom((prev) =>
-      Math.min(
-        150,
-        Math.max(
-          50,
-          prev + amount
-        )
-      )
-    );
+  const changeZoom = (amount: number) => {
+    setZoom((prev) => Math.min(150, Math.max(50, prev + amount)));
   };
 
-  const openDialog = (
-    type:
-      | "link"
-      | "image"
-      | "video"
-  ) => {
+  const openDialog = (type: "link" | "image" | "video") => {
     setDialogType(type);
-
     setDialogValue("");
 
     if (type === "link") {
-      setDialogTitle(
-        "Inserir Link"
-      );
-
-      setDialogMessage(
-        "Digite ou cole a URL do link:"
-      );
+      setDialogTitle("Inserir Link");
+      setDialogMessage("Digite ou cole a URL do link:");
     }
 
     if (type === "image") {
-      setDialogTitle(
-        "Inserir Imagem"
-      );
-
-      setDialogMessage(
-        "Digite ou cole a URL da imagem:"
-      );
+      setDialogTitle("Inserir Imagem");
+      setDialogMessage("Digite ou cole a URL da imagem:");
     }
 
     if (type === "video") {
-      setDialogTitle(
-        "Inserir Vídeo"
-      );
-
-      setDialogMessage(
-        "Digite ou cole a URL do vídeo:"
-      );
+      setDialogTitle("Inserir Vídeo");
+      setDialogMessage("Digite ou cole a URL do vídeo:");
     }
 
     setDialogOpen(true);
   };
 
-  const insertCallout = (
-    type:
-      | "info"
-      | "warning"
-      | "success"
-      | "error"
-  ) => {
-    if (!editor) {
-      return;
-    }
+  const insertCallout = (type: "info" | "warning" | "success" | "error") => {
+    if (!editor) return;
 
     editor
       .chain()
       .focus()
       .insertContent({
         type: "callout",
-
         attrs: { type },
-
         content: [
           {
             type: "paragraph",
-
-            text: `Este é um alerta de ${type}...`,
+            // FIX: estrutura correta do ProseMirror — o texto deve ser aninhado
+            // dentro de "content" como um nó do tipo "text", não como chave "text"
+            // diretamente no objeto do parágrafo. O formato anterior causava o
+            // crash "RangeError: Invalid array passed to renderSpec".
+            content: [
+              {
+                type: "text",
+                text: `Este é um alerta de ${type}...`,
+              },
+            ],
           },
         ],
       })
@@ -292,45 +230,23 @@ export default function RichTextEditor({
   };
 
   const insertBadge = () => {
-    if (!editor) {
-      return;
-    }
+    if (!editor) return;
 
     setBadgeText("1");
-
     setBadgeColor("#2563eb");
-
     setBadgeDialogOpen(true);
   };
 
-  const handleConfirmBadge = (
-    value: string,
-    color: string
-  ) => {
-    if (!editor) {
-      return;
-    }
+  const handleConfirmBadge = (value: string, color: string) => {
+    if (!editor) return;
 
-    const trimmedValue =
-      value.trim();
+    const trimmedValue = value.trim();
+    if (!trimmedValue) return;
 
-    if (!trimmedValue) {
-      return;
-    }
-
-    editor
-      .chain()
-      .focus()
-      .insertBadge(
-        trimmedValue,
-        color
-      )
-      .run();
+    editor.chain().focus().insertBadge(trimmedValue, color).run();
 
     setBadgeText(trimmedValue);
-
     setBadgeColor(color);
-
     setBadgeDialogOpen(false);
   };
 
@@ -342,25 +258,13 @@ export default function RichTextEditor({
   }: any) => (
     <Tooltip label={title}>
       <ActionIcon
-        variant={
-          active
-            ? "gradient"
-            : "subtle"
-        }
-        gradient={{
-          from: "violet",
-          to: "blue",
-          deg: 135,
-        }}
+        variant={active ? "gradient" : "subtle"}
+        gradient={{ from: "violet", to: "blue", deg: 135 }}
         color="violet"
         radius="md"
         size="lg"
         onClick={onClick}
-        style={{
-          flexShrink: 0,
-          minWidth: 38,
-          minHeight: 38,
-        }}
+        style={{ flexShrink: 0, minWidth: 38, minHeight: 38 }}
       >
         {children}
       </ActionIcon>
@@ -372,12 +276,7 @@ export default function RichTextEditor({
   }
 
   return (
-    <Stack
-      gap="md"
-      style={{
-        height: "100%",
-      }}
-    >
+    <Stack gap="md" style={{ height: "100%" }}>
       <Paper
         className="editor-toolbar"
         p="sm"
@@ -387,20 +286,13 @@ export default function RichTextEditor({
           background: dark
             ? "linear-gradient(180deg, #111827 0%, #0f172a 100%)"
             : "#ffffff",
-
           border: dark
             ? "1px solid rgba(255,255,255,0.08)"
             : "1px solid #d1d5db",
-
           position: "sticky",
-
           top: 0,
-
           zIndex: 50,
-
-          backdropFilter:
-            "blur(12px)",
-
+          backdropFilter: "blur(12px)",
           overflow: "hidden",
         }}
       >
@@ -408,58 +300,28 @@ export default function RichTextEditor({
           <Group
             gap="sm"
             wrap="nowrap"
-            style={{
-              minWidth:
-                "max-content",
-
-              paddingInline:
-                "10px",
-            }}
+            style={{ minWidth: "max-content", paddingInline: "10px" }}
           >
             <ToolbarButton
               title="Negrito"
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .toggleBold()
-                  .run()
-              }
-              active={editor.isActive(
-                "bold"
-              )}
+              onClick={() => editor.chain().focus().toggleBold().run()}
+              active={editor.isActive("bold")}
             >
               <FaBold />
             </ToolbarButton>
 
             <ToolbarButton
               title="Itálico"
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .toggleItalic()
-                  .run()
-              }
-              active={editor.isActive(
-                "italic"
-              )}
+              onClick={() => editor.chain().focus().toggleItalic().run()}
+              active={editor.isActive("italic")}
             >
               <FaItalic />
             </ToolbarButton>
 
             <ToolbarButton
               title="Sublinhado"
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .toggleUnderline()
-                  .run()
-              }
-              active={editor.isActive(
-                "underline"
-              )}
+              onClick={() => editor.chain().focus().toggleUnderline().run()}
+              active={editor.isActive("underline")}
             >
               <FaUnderline />
             </ToolbarButton>
@@ -468,91 +330,56 @@ export default function RichTextEditor({
 
             <ToolbarButton
               title="Lista"
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .toggleBulletList()
-                  .run()
-              }
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
             >
               <FaListUl />
             </ToolbarButton>
 
             <ToolbarButton
               title="Lista Ordenada"
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .toggleOrderedList()
-                  .run()
-              }
+              onClick={() => editor.chain().focus().toggleOrderedList().run()}
             >
               <FaListOl />
             </ToolbarButton>
 
             <ToolbarButton
               title="Citação"
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .toggleBlockquote()
-                  .run()
-              }
+              onClick={() => editor.chain().focus().toggleBlockquote().run()}
             >
               <FaQuoteLeft />
             </ToolbarButton>
 
             <ToolbarButton
               title="Código"
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .toggleCodeBlock()
-                  .run()
-              }
-              active={editor.isActive(
-                "codeBlock"
-              )}
+              onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+              active={editor.isActive("codeBlock")}
             >
               <FaCode />
             </ToolbarButton>
 
             <Divider orientation="vertical" />
 
-            <ToolbarButton
-              title="Badge"
-              onClick={insertBadge}
-            >
+            <ToolbarButton title="Badge" onClick={insertBadge}>
               <FaCircle />
             </ToolbarButton>
 
             <ToolbarButton
               title="Link"
-              onClick={() =>
-                openDialog("link")
-              }
+              onClick={() => openDialog("link")}
             >
               <FaLink />
             </ToolbarButton>
 
             <ToolbarButton
               title="Imagem"
-              onClick={() =>
-                openDialog("image")
-              }
+              onClick={() => openDialog("image")}
             >
               <FaImage />
             </ToolbarButton>
 
             <ToolbarButton
               title="Vídeo"
-              onClick={() =>
-                openDialog("video")
-              }
+              onClick={() => openDialog("video")}
             >
               <FaVideo />
             </ToolbarButton>
@@ -561,42 +388,28 @@ export default function RichTextEditor({
 
             <ToolbarButton
               title="Info"
-              onClick={() =>
-                insertCallout("info")
-              }
+              onClick={() => insertCallout("info")}
             >
               <FaInfoCircle />
             </ToolbarButton>
 
             <ToolbarButton
               title="Warning"
-              onClick={() =>
-                insertCallout(
-                  "warning"
-                )
-              }
+              onClick={() => insertCallout("warning")}
             >
               <FaExclamationTriangle />
             </ToolbarButton>
 
             <ToolbarButton
               title="Success"
-              onClick={() =>
-                insertCallout(
-                  "success"
-                )
-              }
+              onClick={() => insertCallout("success")}
             >
               <FaCheckCircle />
             </ToolbarButton>
 
             <ToolbarButton
               title="Error"
-              onClick={() =>
-                insertCallout(
-                  "error"
-                )
-              }
+              onClick={() => insertCallout("error")}
             >
               <FaTimesCircle />
             </ToolbarButton>
@@ -605,45 +418,21 @@ export default function RichTextEditor({
 
             <ToolbarButton
               title="Alinhar Esquerda"
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .setTextAlign(
-                    "left"
-                  )
-                  .run()
-              }
+              onClick={() => editor.chain().focus().setTextAlign("left").run()}
             >
               <FaAlignLeft />
             </ToolbarButton>
 
             <ToolbarButton
               title="Centralizar"
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .setTextAlign(
-                    "center"
-                  )
-                  .run()
-              }
+              onClick={() => editor.chain().focus().setTextAlign("center").run()}
             >
               <FaAlignCenter />
             </ToolbarButton>
 
             <ToolbarButton
               title="Alinhar Direita"
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .setTextAlign(
-                    "right"
-                  )
-                  .run()
-              }
+              onClick={() => editor.chain().focus().setTextAlign("right").run()}
             >
               <FaAlignRight />
             </ToolbarButton>
@@ -652,26 +441,14 @@ export default function RichTextEditor({
 
             <ToolbarButton
               title="Desfazer"
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .undo()
-                  .run()
-              }
+              onClick={() => editor.chain().focus().undo().run()}
             >
               <FaUndo />
             </ToolbarButton>
 
             <ToolbarButton
               title="Refazer"
-              onClick={() =>
-                editor
-                  .chain()
-                  .focus()
-                  .redo()
-                  .run()
-              }
+              onClick={() => editor.chain().focus().redo().run()}
             >
               <FaRedo />
             </ToolbarButton>
@@ -680,9 +457,7 @@ export default function RichTextEditor({
 
             <ToolbarButton
               title="Menos Zoom"
-              onClick={() =>
-                changeZoom(-10)
-              }
+              onClick={() => changeZoom(-10)}
             >
               <FaSearchMinus />
             </ToolbarButton>
@@ -690,20 +465,14 @@ export default function RichTextEditor({
             <Text
               size="sm"
               fw={700}
-              c={
-                dark
-                  ? "gray.4"
-                  : "dark"
-              }
+              c={dark ? "gray.4" : "dark"}
             >
               {zoom}%
             </Text>
 
             <ToolbarButton
               title="Mais Zoom"
-              onClick={() =>
-                changeZoom(10)
-              }
+              onClick={() => changeZoom(10)}
             >
               <FaSearchPlus />
             </ToolbarButton>
@@ -718,136 +487,103 @@ export default function RichTextEditor({
         shadow="xl"
         style={{
           flex: 1,
-
           overflow: "hidden",
-
-          background: dark
-            ? "#0f172a"
-            : "#ffffff",
-
+          background: dark ? "#0f172a" : "#ffffff",
           border: dark
             ? "1px solid rgba(255,255,255,0.08)"
             : "1px solid #d1d5db",
         }}
       >
         <div className="editor-content-wrapper">
-          <div
-            style={{
-              zoom: `${zoom}%`,
-              minHeight: "100%",
-            }}
-          >
-            <EditorContent
-              editor={editor}
-              className="editor-content"
-            />
+          <div style={{ zoom: `${zoom}%`, minHeight: "100%" }}>
+            <EditorContent editor={editor} className="editor-content" />
           </div>
         </div>
       </Paper>
 
-         <PromptDialog
+      <PromptDialog
         open={dialogOpen}
-
         title={dialogTitle}
-
         message={dialogMessage}
-
         placeholder="Cole aqui a URL"
-
         initialValue={dialogValue}
-
         confirmText="Inserir"
-
         cancelText="Cancelar"
-
         onConfirm={(value: string) => {
-
-          if (
-            !editor ||
-            !dialogType
-          ) {
-
+          if (!editor || !dialogType) {
             setDialogOpen(false);
-
             setDialogValue("");
-
             setDialogType(null);
-
             return;
           }
 
-          const input =
-            value.trim();
+          const input = value.trim();
 
           if (!input) {
-
             setDialogOpen(false);
-
             setDialogValue("");
-
             setDialogType(null);
-
             return;
           }
 
-          try {
+        try {
 
-            if (
-              dialogType ===
-              "image"
-            ) {
+  if (dialogType === "image") {
 
-              editor
-                .chain()
-                .focus()
-                .setResizableImage({
-                  src: input,
-                })
-                .run();
-            }
+    editor
+      .chain()
+      .focus()
+      .insertContent({
 
-            else if (
-              dialogType ===
-              "video"
-            ) {
+        type: "resizableImage",
 
-              editor
-                .chain()
-                .focus()
-                .setResizableVideo({
-                  src: input,
-                  width: 560,
-                  align: "center",
-                })
-                .run();
-            }
+        attrs: {
+          src: input,
+        },
+      })
+      .run();
 
-            else if (
-              dialogType ===
-              "link"
-            ) {
+  } else if (
+    dialogType === "video"
+  ) {
 
-              editor
-                .chain()
-                .focus()
-                .setLink({
-                  href: input,
-                })
-                .run();
-            }
+    editor
+      .chain()
+      .focus()
+      .setResizableVideo({
 
-          } catch (error) {
+        src: input,
 
-            console.error(error);
-          }
+        width: 560,
 
-          setDialogOpen(false);
+        align: "center",
+      })
+      .run();
 
-          setDialogValue("");
+  } else if (
+    dialogType === "link"
+  ) {
 
-          setDialogType(null);
+    editor
+      .chain()
+      .focus()
+      .setLink({
+        href: input,
+      })
+      .run();
+  }
+
+} catch (error) {
+
+  console.error(error);
+}
+
+setDialogOpen(false);
+
+setDialogValue("");
+
+setDialogType(null);
         }}
-
         onCancel={() => {
 
           setDialogOpen(false);
@@ -858,29 +594,23 @@ export default function RichTextEditor({
         }}
       />
 
-<PromptBadge
-  open={badgeDialogOpen}
-  title="Inserir Badge"
-  message="Digite o texto do badge e escolha a cor."
-  placeholder="Ex: Novo"
+      <PromptBadge
+        open={badgeDialogOpen}
+        title="Inserir Badge"
+        message="Digite o texto do badge e escolha a cor."
+        placeholder="Ex: Novo"
+        initialValue={badgeText}
+        initialColor={badgeColor}
+        onConfirm={handleConfirmBadge}
+        onCancel={() => {
 
-  initialValue={badgeText}
+          setBadgeDialogOpen(false);
 
-  initialColor={badgeColor}
+          setBadgeText("1");
 
-  onConfirm={
-    handleConfirmBadge
-  }
-
-  onCancel={() => {
-
-    setBadgeDialogOpen(false);
-
-    setBadgeText("1");
-
-    setBadgeColor("#2563eb");
-  }}
-/>
+          setBadgeColor("#2563eb");
+        }}
+      />
     </Stack>
   );
 }

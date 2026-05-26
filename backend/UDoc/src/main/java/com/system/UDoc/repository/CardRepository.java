@@ -1,5 +1,6 @@
 package com.system.UDoc.repository;
 
+import com.system.UDoc.dto.UserCardViewDTO;
 import com.system.UDoc.entity.Card;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +37,7 @@ public interface CardRepository extends JpaRepository<Card, Long> {
 
     ORDER BY c.id DESC
 """)
+
     Page<Card> searchAdminCards(
 
             @Param("search")
@@ -46,6 +48,21 @@ public interface CardRepository extends JpaRepository<Card, Long> {
 
             Pageable pageable
     );
+
+
+    @Query("""
+    SELECT new com.system.UDoc.dto.UserCardViewDTO(
+        c.id,
+        c.content
+    )
+    FROM Card c
+    WHERE c.id = :id
+""")
+    Optional<UserCardViewDTO> findViewById(
+            @Param("id")
+            Long id
+    );
+
     }
 
 
