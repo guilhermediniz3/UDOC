@@ -56,6 +56,20 @@ import {
 import PromptDialog from "../PromptDialog/PromptDialog";
 import PromptBadge from "../PromptDialog/PromptBadge";
 
+declare module "@tiptap/core" {
+
+  interface Commands<ReturnType> {
+
+    badge: {
+
+      insertBadge: (
+        text?: string,
+        color?: string
+      ) => ReturnType;
+    };
+  }
+}
+
 interface RichTextEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -512,29 +526,70 @@ export default function RichTextEditor({
             return;
           }
 
-          try {
-            if (dialogType === "image") {
-              editor.chain().focus().setResizableImage({ src: input }).run();
-            } else if (dialogType === "video") {
-              editor
-                .chain()
-                .focus()
-                .setResizableVideo({ src: input, width: 560, align: "center" })
-                .run();
-            } else if (dialogType === "link") {
-              editor.chain().focus().setLink({ href: input }).run();
-            }
-          } catch (error) {
-            console.error(error);
-          }
+        try {
 
-          setDialogOpen(false);
-          setDialogValue("");
-          setDialogType(null);
+  if (dialogType === "image") {
+
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+
+        type: "resizableImage",
+
+        attrs: {
+          src: input,
+        },
+      })
+      .run();
+
+  } else if (
+    dialogType === "video"
+  ) {
+
+    editor
+      .chain()
+      .focus()
+      .setResizableVideo({
+
+        src: input,
+
+        width: 560,
+
+        align: "center",
+      })
+      .run();
+
+  } else if (
+    dialogType === "link"
+  ) {
+
+    editor
+      .chain()
+      .focus()
+      .setLink({
+        href: input,
+      })
+      .run();
+  }
+
+} catch (error) {
+
+  console.error(error);
+}
+
+setDialogOpen(false);
+
+setDialogValue("");
+
+setDialogType(null);
         }}
         onCancel={() => {
+
           setDialogOpen(false);
+
           setDialogValue("");
+
           setDialogType(null);
         }}
       />
@@ -548,8 +603,11 @@ export default function RichTextEditor({
         initialColor={badgeColor}
         onConfirm={handleConfirmBadge}
         onCancel={() => {
+
           setBadgeDialogOpen(false);
+
           setBadgeText("1");
+
           setBadgeColor("#2563eb");
         }}
       />

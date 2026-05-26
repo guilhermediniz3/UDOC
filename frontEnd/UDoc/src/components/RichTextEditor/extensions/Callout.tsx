@@ -1,6 +1,6 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer, NodeViewWrapper, NodeViewContent } from "@tiptap/react";
-import React from "react";
+
 
 const CalloutComponent = ({ node, updateAttributes }: any) => {
   const { type, textAlign } = node.attrs;

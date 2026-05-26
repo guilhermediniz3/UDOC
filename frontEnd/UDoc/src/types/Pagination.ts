@@ -1,15 +1,12 @@
-export interface Pagination<T> {
-  content: T[];
+export interface PaginationResponse<T> {
 
-  totalElements: number;
+  content: T[];
 
   totalPages: number;
 
-  size: number;
+  totalElements: number;
 
   number: number;
 
-  first: boolean;
-
-  last: boolean;
+  size: number;
 }

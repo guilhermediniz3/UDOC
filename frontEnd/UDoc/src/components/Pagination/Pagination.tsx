@@ -4,72 +4,47 @@ import {
   Select,
 } from "@mantine/core";
 
-interface PaginationProps {
+interface PaginationComponentProps {
   page: number;
-
-  totalPages: number;
-
+  total: number;
   size: number;
-
-  onPageChange: (
-    page: number
-  ) => void;
-
-  onSizeChange: (
-    size: number
-  ) => void;
+  onChange: (page: number) => void;
+  onSizeChange: (size: number) => void;
 }
 
-function PaginationComponent({
+export default function PaginationComponent({
   page,
-  totalPages,
+  total,
   size,
-  onPageChange,
+  onChange,
   onSizeChange,
-}: PaginationProps) {
+}: PaginationComponentProps) {
   return (
-    <Group
-      justify="space-between"
-      mt={40}
-    >
+    <Group justify="space-between" align="center" mt="30px">
       <Pagination
         value={page}
-        onChange={onPageChange}
-        total={totalPages}
+        onChange={onChange}
+        total={total}
         radius="xl"
-        size="md"
       />
 
       <Select
-        w={150}
-        radius="xl"
         value={String(size)}
         onChange={(value) => {
-          if (!value) return;
-
-          onSizeChange(Number(value));
+          onSizeChange(Number(value || "10"));
         }}
-        data={[
-          {
-            value: "10",
-            label: "10 / página",
+        data={["10", "20", "50", "100"]}
+        w={120}
+        radius="xl"
+        allowDeselect={false}
+        styles={{
+          input: {
+            background: "var(--input-bg)",
+            border: "1px solid var(--border-color)",
+            color: "var(--text-primary)",
           },
-          {
-            value: "20",
-            label: "20 / página",
-          },
-          {
-            value: "50",
-            label: "50 / página",
-          },
-          {
-            value: "100",
-            label: "100 / página",
-          },
-        ]}
+        }}
       />
     </Group>
   );
 }
-
-export default PaginationComponent;
